@@ -11,26 +11,26 @@ public class Java8ParallelStreamMain {
         System.out.println("=================================");
 
 //        int[] array= {1,2,3,4,5,6,7,8,9,10};
-        int[] array= IntStream.rangeClosed(1,20000000).toArray();
+        int[] array= IntStream.rangeClosed(1,100).toArray();
 
-        IntStream intArrStream=Arrays.stream(array);
+//        IntStream intArrStream=Arrays.stream(array);
 //        intArrStream.forEach(s->
 //                {
 //                    System.out.println(s+" "+Thread.currentThread().getName());
 //                }
 //        );
-        System.out.println("countSequential - " + intArrStream.filter(s->isPrime(s)).count());
+//        System.out.println("countSequential - " + intArrStream.filter(s->isPrime(s)).count());
 
 
         System.out.println("=================================");
         System.out.println("Using Parallel Stream");
         System.out.println("=================================");
         IntStream intParallelStream=Arrays.stream(array).parallel();
-//        intParallelStream.forEach(s->
-//                {
-//                    System.out.println(s+" "+Thread.currentThread().getName());
-//                }
-//        );
+        intParallelStream.forEach(s->
+                {
+                    System.out.println(s+" "+Thread.currentThread().getName());
+                }
+        );
         System.out.println("countParallel - " + intParallelStream.filter(s->isPrime(s)).count());
     }
 

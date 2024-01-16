@@ -8,6 +8,8 @@ package exercises5;
 import exercises5.benchmarking.Benchmark;
 import exercises5.benchmarking.Benchmarkable;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class TestCountPrimesThreads {
 
     public static void main(String[] args) { new TestCountPrimesThreads(); }
@@ -16,13 +18,13 @@ public class TestCountPrimesThreads {
         Benchmark.SystemInfo();
         final int range = 1_000_000;
 
-        Benchmark.Mark7("countSequential", i -> countSequential(range));
+//        Benchmark.Mark7("countSequential", i -> countSequential(range));
         for (int c=1; c<=16; c++) {
             final int threadCount = c;
             Benchmark.Mark7(String.format("countParallelN %7d", threadCount),
                     i -> countParallelN(range, threadCount));
-            //Mark7(String.format("countParallelNLocal %2d", threadCount),
-            //      i -> countParallelNLocal(range, threadCount));
+            Benchmark.Mark7(String.format("countParallelNLocal %2d", threadCount),
+                  i -> countParallelNLocal(range, threadCount));
         }
     }
 
@@ -73,10 +75,36 @@ public class TestCountPrimesThreads {
     }
 
     // General parallel solution, using multiple threads
-    private static int countParallelNLocal(int range, int threadCount) {
-        //...
-        return 0; //change 0 to result;
-    }
+//    private static int countParallelNLocal(int range, int threadCount) {
+//        //...
+//        return 0; //change 0 to result;
+//    }
 
+
+    private static long countParallelNLocal(int range, int threadCount) {
+        final int perThread = range / threadCount;
+        final AtomicLong lc = new AtomicLong();
+        Thread[] threads = new Thread[threadCount];
+        for (int t = 0; t < threadCount; t++) {
+            final int from = perThread * t,
+                    to = (t + 1 == threadCount) ? range : perThread * (t + 1);
+            threads[t] = new Thread(() -> {
+                long count=0;
+                for (int i = from; i < to; i++)
+                    if (isPrime(i))
+                        count++;
+                lc.getAndAdd(count);
+            });
+        }
+        for (int t = 0; t < threadCount; t++)
+            threads[t].start();
+        try {
+            for (int t = 0; t < threadCount; t++)
+                threads[t].join();
+            // System.out.println("Primes: "+lc.get());
+        } catch (InterruptedException exn) {
+        }
+        return lc.get();
+    }
 }
 

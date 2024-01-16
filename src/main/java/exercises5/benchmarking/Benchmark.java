@@ -261,6 +261,11 @@ public class Benchmark {
     }
 
     public static double Mark6(String msg, IntToDoubleFunction f) {
+        // count: 每次迭代中函数执行次数的变量 (用于控制负载
+        // 不断翻倍 count，目的是观察函数执行时间随着执行次数的增加而变化的趋势。了解函数在不同负载下的性能表现。
+
+        // n: 表示在每个 count 值下运行基准测试的次数
+        // 用于取平均值，减少误差
         int n = 10, count = 1, totalCount = 0;
         double dummy = 0.0, runningTime = 0.0, st = 0.0, sst = 0.0;
         do {
@@ -298,7 +303,7 @@ public class Benchmark {
                 sst += time * time;
                 totalCount += count;
             }
-        } while (runningTime < 0.25 && count < Integer.MAX_VALUE/2);
+        } while (runningTime < 0.25 && count < Integer.MAX_VALUE/2); // 迭代中逐步增加操作次数，同时确保在某个负载下（由 count 控制）函数执行时间不会过长，避免测试变得过于耗时。
         double mean = st/n, sdev = Math.sqrt((sst - mean*mean*n)/(n-1));
         System.out.printf("%-25s %15.1f ns %10.2f %10d%n", msg, mean, sdev, count);
         return dummy / totalCount;

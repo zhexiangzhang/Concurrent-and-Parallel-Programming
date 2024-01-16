@@ -15,7 +15,7 @@ public class TestTimeSearch {
     public static void main(String[] args) { new TestTimeSearch();}
 
     public TestTimeSearch() {
-        final String filename = "E:\\KU\\1\\PCPP\\mavenAssignment\\src\\main\\resources\\long-text-file.txt";
+        final String filename = "R:\\KU\\PCPP\\mavenAssignment\\src\\main\\resources\\long-text-file.txt";
         final String target= "ipsum";
 
         final PrimeCounter lc= new PrimeCounter();  //name is abit misleading, it is just a counter
@@ -32,7 +32,7 @@ public class TestTimeSearch {
 
     static long search(String x, String[] lineArray, int from, int to, PrimeCounter lc){
         //Search each line of file
-        for (int i=from; i<to; i++ ) lc.add(linearSearch(x, lineArray[i]));
+        for (int i=from; i<to; i++ ) lc.add(linearSearch(x, lineArray[i])); // each line is a string with words separated by spaces
         //System.out.println("Found: "+lc.get());
         return lc.get();
     }

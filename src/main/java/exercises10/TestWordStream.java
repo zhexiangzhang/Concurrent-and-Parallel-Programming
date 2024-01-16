@@ -24,6 +24,7 @@ public class TestWordStream {
     public static void main(String[] args) {
         String filename = "src/main/resources/english-words.txt";
         String url = "https://staunstrups.dk/jst/english-words.txt";
+//        Q4(filename);
 //        Q6
 //        Benchmark.Mark7("Sequential Stream", i -> Q5(filename));
 //        Benchmark.Mark7("Parallel Stream", i -> Q6(filename));
@@ -84,10 +85,11 @@ public class TestWordStream {
 
     public static void Q8(String filename){
         IntSummaryStatistics stats = readWords(filename)
-                .map(String::length)
-                .collect(IntSummaryStatistics::new,
-                        IntSummaryStatistics::accept,
-                        IntSummaryStatistics::combine);
+                .parallel()
+                .map((word)->word.length())
+                .collect(IntSummaryStatistics::new, // 建一个新的IntSummaryStatistics对象作为初始容器
+                        IntSummaryStatistics::accept, // 将Stream的元素添加到统计信息容器的累加器。(将每个单词的长度添加到IntSummaryStatisticss对象)
+                        IntSummaryStatistics::combine); // 将两个统计信息容器合并的组合器。在并行流的情况下，不同的部分可能在不同的线程上处理，因此需要将它们合并成一个。s
         System.out.println("Min: " + stats.getMin());
         System.out.println("Man: " + stats.getMax());
         System.out.println("Avg: " + stats.getAverage());

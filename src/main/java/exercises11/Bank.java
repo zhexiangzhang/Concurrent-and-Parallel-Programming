@@ -34,6 +34,18 @@ public class Bank extends AbstractBehavior<Bank.BankCommand> {
         }
     }
 
+    // for challenging 9
+    public static final class NoEnoughBalance implements BankCommand {
+        public final String from;
+        public final String to;
+        public final int amount;
+
+        public NoEnoughBalance(String from, String to, int amount) {
+            this.from = from;
+            this.to = to;
+            this.amount = amount;
+        }
+    }
 
     /* --- State ---------------------------------------- */
     private final Map<String, ActorRef<Account.AccountCommand>> accounts;
@@ -59,7 +71,11 @@ public class Bank extends AbstractBehavior<Bank.BankCommand> {
     public Receive<BankCommand> createReceive() {
         return newReceiveBuilder()
                 .onMessage(NewAccount.class, this::onCreateAccount)
-                .onMessage(Transaction.class, this::onTransaction)
+//                .onMessage(Transaction.class, this::onTransaction)
+                // for challenging 9, uncomment next line and comment the above line
+                .onMessage(Transaction.class, this::onConditionTransaction)
+                // for challenging 10, recevie the message from the account "NoEnoughBalance"
+                .onMessage(NoEnoughBalance.class, this::onNoEnoughBalance)
                 .build();
     }
 
@@ -80,6 +96,25 @@ public class Bank extends AbstractBehavior<Bank.BankCommand> {
         ActorRef<Account.AccountCommand> to = this.accounts.get(msg.to);
         from.tell(new Account.Deposit(-msg.amount));
         to.tell(new Account.Deposit(msg.amount));
+        return this;
+    }
+
+    // for Challenging 9 and 10.
+    public Behavior<BankCommand> onConditionTransaction(Transaction msg) {
+        getContext().getLog().info("{} Actor received transaction from {} to {} amount {}",
+                getContext().getSelf().path().name(), msg.from, msg.to, msg.amount);
+        ActorRef<Account.AccountCommand> from = this.accounts.get(msg.from);
+//        ActorRef<Account.AccountCommand> to = this.accounts.get(msg.to);
+        // first subtract the amount from the sender's account
+        from.tell(new Account.ConditionDeposit(-1*msg.amount, msg.from, msg.to, this.accounts.get(msg.to), getContext().getSelf()));
+        // to.tell(new Account.Deposit(msg.amount));
+        return this;
+    }
+
+    // for challenging 10
+    public Behavior<BankCommand> onNoEnoughBalance(NoEnoughBalance msg) {
+        getContext().getLog().info("no enough balance, transaction rejected, from {} to {} amount {}",
+                msg.from, msg.to, msg.amount);
         return this;
     }
 }

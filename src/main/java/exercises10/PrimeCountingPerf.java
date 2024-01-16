@@ -124,22 +124,38 @@ class PrimeCountingPerf {
 
     // IntStream solution
     private static long countIntStream(int range) {
-        long count= 0;
-        // to be filled out
+        long count = IntStream.range(2, range)
+        .filter(PrimeCountingPerf::isPrime)
+        .count();
         return count;
     }
 
+//    private static long countIntStream(int range) {
+//
+//        long count = IntStream.range(2, 100)
+//                .filter(PrimeCountingPerf::isPrime)
+//                .map((prime) -> {
+//                    System.out.println(prime);
+//                    return prime;
+//                }).count();
+//        return count;
+//    }
+
     // Parallel Stream solution
     private static long countParallel(int range) {
-        long count= 0;
-        // to be filled out
+        long count= IntStream.range(2, range)
+                .parallel()
+                .filter(PrimeCountingPerf::isPrime)
+                .count();
         return count;
     }
 
     // parallelStream solution
     private static long countparallelStream(List<Integer> list) {
-        long count= 0;
-        // to be filled out
+        long count= list
+                .parallelStream()
+                .filter(PrimeCountingPerf::isPrime)
+                .count();
         return count;
     }
 

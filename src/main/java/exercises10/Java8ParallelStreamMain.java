@@ -31,7 +31,7 @@ public class Java8ParallelStreamMain {
                     System.out.println(s+" "+Thread.currentThread().getName());
                 }
         );
-        System.out.println("countParallel - " + intParallelStream.filter(s->isPrime(s)).count());
+//        System.out.println("countParallel - " + intParallelStream.filter(s->isPrime(s)).count());
     }
 
     private static boolean isPrime(int n) {

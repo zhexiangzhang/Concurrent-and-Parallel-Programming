@@ -51,8 +51,9 @@ public class Guardian extends AbstractBehavior<Guardian.GuardianCommand> {
         final ActorRef<MobileApp.MobileAppCommand> mobileApp2 = getContext().spawn(MobileApp.create(), "mobileApp2");
 
         // spawn the account actors
-        final ActorRef<Account.AccountCommand> account1 = getContext().spawn(Account.create(), "account1");
-        final ActorRef<Account.AccountCommand> account2 = getContext().spawn(Account.create(), "account2");
+            // assign a bank to each account, for challenging question 9
+        final ActorRef<Account.AccountCommand> account1 = getContext().spawn(Account.create(bank1), "account1");
+        final ActorRef<Account.AccountCommand> account2 = getContext().spawn(Account.create(bank2), "account2");
 
         mobileApp1.tell(new MobileApp.NewBank("bank1", bank1));
         mobileApp1.tell(new MobileApp.NewBank("bank2", bank2));
@@ -71,9 +72,9 @@ public class Guardian extends AbstractBehavior<Guardian.GuardianCommand> {
         mobileApp2.tell(new MobileApp.StartTransaction("account2", "account1", "bank2", 50));
 
         // start make 100 random payment
-        mobileApp1.tell(new MobileApp.Makepayments("account1", "account2", "bank1"));
+//        mobileApp1.tell(new MobileApp.Makepayments("account1", "account2", "bank1"));
 
-        sleep(1000);
+        sleep(100);
 
         // print balance
         account1.tell(new Account.PrintBalance());

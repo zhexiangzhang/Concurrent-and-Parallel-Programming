@@ -55,22 +55,27 @@ public class ReadWriteCASLock implements SimpleRWTryLockInterface {
 
     public void readerUnlock() {
         Thread currentThread = Thread.currentThread();
-        Holders currectHolders = holders.get();
-        if (currectHolders == null) {
-            throw new RuntimeException("reader is null");
-        } else if (currectHolders instanceof ReaderList) {
-            ReaderList readerList = (ReaderList) currectHolders;
-            if (readerList.contains(currentThread)) {
-                ReaderList newReaderList = readerList.remove(Thread.currentThread());
-                if (holders.compareAndSet(readerList, newReaderList)) {
-                    return;
+        // 可能别人先unlock了，这里就会失败，应该要retry吧
+        while(true){
+            Holders currectHolders = holders.get();
+            if (currectHolders == null) {
+                throw new RuntimeException("reader is null");
+            }
+            else if (currectHolders instanceof ReaderList) {
+                ReaderList readerList = (ReaderList) currectHolders;
+                if (readerList.contains(currentThread)) {
+                    ReaderList newReaderList = readerList.remove(Thread.currentThread());
+                    if (holders.compareAndSet(readerList, newReaderList)) {
+                        return;
+                    }
+                }
+                else {
+                    throw new RuntimeException("thread is not hold read lock");
                 }
             }
             else {
-                throw new RuntimeException("reader is not current thread");
+                throw new RuntimeException("holder is not a reader");
             }
-        } else {
-            throw new RuntimeException("holder is not a reader");
         }
     }
 
@@ -83,10 +88,10 @@ public class ReadWriteCASLock implements SimpleRWTryLockInterface {
         return false;
     }
 
-    public void writerUnlock() {
+    public void writerUnlock() {   // 不要创建新对象，用new writer (thread) 创建的对象虽然thread相同，但是不是同一个对象
         Writer writer = (Writer) holders.get();
         if (writer == null || writer.thread != Thread.currentThread()) {
-            throw new RuntimeException("writer is null or thread is not current thread");
+            throw new RuntimeException("writer is null or thread is not the holder");
         }
         if (!holders.compareAndSet(writer, null)) {
             throw new RuntimeException("writer is not current thread");

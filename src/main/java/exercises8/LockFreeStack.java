@@ -5,10 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 // Treiber's LockFree Stack (Goetz 15.4 & Herlihy 11.2)
 class LockFreeStack<T> {
     AtomicReference<Node<T>> top = new AtomicReference<Node<T>>(); // Initializes to null
-    //  1 2 (top)
-    // push 3
-    // pop=>2
-    // 我们需要也argue 一个现线程在另一个线程已经执行完push1后再执行吗，还是说只是覆盖所有的if分支就行
+
     public void push(T value) {
         Node<T> newHead = new Node<T>(value);
         Node<T> oldHead;
@@ -25,12 +22,12 @@ class LockFreeStack<T> {
         Node<T> newHead;
         Node<T> oldHead;
         do {
-            oldHead = top.get();  // POP1
-            if(oldHead == null) { // POP2
+            oldHead = top.get();  // POP1 在这一瞬间，oldHead的值已经固定了，生效了，如果是null，那么就已经在这一刻决定他要返回
+            if(oldHead == null) {
                 return null;
             }
             newHead = oldHead.next;
-        } while (!top.compareAndSet(oldHead,newHead));  // POP3
+        } while (!top.compareAndSet(oldHead,newHead));  // POP2
 
         return oldHead.value;
     }
